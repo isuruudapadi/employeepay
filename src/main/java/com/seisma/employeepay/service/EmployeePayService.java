@@ -17,6 +17,7 @@ public class EmployeePayService {
     public  HashMap<String, EmpPay> empPayCalculations(List<Employee> employee){
         HashMap<String, EmpPay> rtObject = new  HashMap<String, EmpPay>();
         for(Employee emp:employee){
+
             rtObject.put(emp.toString(), PayCalculation.PayCalculation(emp));
 
         }

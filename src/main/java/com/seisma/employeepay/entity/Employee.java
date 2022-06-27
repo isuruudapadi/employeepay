@@ -22,6 +22,7 @@ public class Employee {
         this.annualSalary=annualSalary;
         this.paymentMonth =paymentMonth;
         this.superRate=superRate;
+
     }
     public String getFirstName() {
         return firstName;

@@ -23,6 +23,7 @@ public class EmpPay {
         this.incomeTax=incomeTax;
         this.superannuation=superannuation;
         this.netIncome=netIncome;
+
     }
     public String getFromDate() {
         return fromDate;

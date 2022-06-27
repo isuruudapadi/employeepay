@@ -12,6 +12,7 @@ public  class PayCalculation {
      * @param  @Employee   Employee model send data for calculations
      */
     public static EmpPay PayCalculation(Employee empData) {
+
         EmpPay empPay = new EmpPay();
         empPay.setGrossIncome(PayCalculation.grossIncomeCalculation(empData.getAnnualSalary()));
         empPay.setIncomeTax(PayCalculation.grossIncomeCalculation(empPay.getGrossIncome()));
@@ -19,6 +20,7 @@ public  class PayCalculation {
         empPay.setSuperannuation(PayCalculation.superCalculation(empPay.getGrossIncome(),empData.getSuperRate()));
         empPay.setFromDate(PayCalculation.setFromDate(empData.getPaymentMonth()));
         empPay.setToDate(PayCalculation.setToDate(empData.getPaymentMonth()));
+
         return empPay;
     }
 

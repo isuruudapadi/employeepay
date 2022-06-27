@@ -21,9 +21,13 @@ public class EmployeePayController {
      */
     @PostMapping("/payCalculation")
     public  HashMap<String, EmpPay> PayCalculation(@RequestBody List<Employee> employee){
+        //create list for return dataset
          HashMap<String, EmpPay>entities = new HashMap<String, EmpPay>();
+
         EmployeePayService employeePayService = new EmployeePayService();
+        //pass data set to calculation
         entities= employeePayService.empPayCalculations( employee);
+
         return entities;
     }
 
