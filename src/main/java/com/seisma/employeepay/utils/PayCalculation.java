@@ -1,8 +1,15 @@
 package com.seisma.employeepay.utils;
 
+
 import com.seisma.employeepay.entity.EmpPay;
 import com.seisma.employeepay.entity.Employee;
+import org.json.JSONArray;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Month;
 
 public  class PayCalculation {
@@ -15,13 +22,46 @@ public  class PayCalculation {
 
         EmpPay empPay = new EmpPay();
         empPay.setGrossIncome(PayCalculation.grossIncomeCalculation(empData.getAnnualSalary()));
-        empPay.setIncomeTax(PayCalculation.grossIncomeCalculation(empPay.getGrossIncome()));
+        empPay.setIncomeTax(PayCalculation.incomeTaxCalculation(empData.getAnnualSalary(),parseJSONFile("..\\employeepay\\data.json")));
         empPay.setNetIncome(PayCalculation.netIncomeCalculation(empPay.getGrossIncome(), empPay.getIncomeTax()));
         empPay.setSuperannuation(PayCalculation.superCalculation(empPay.getGrossIncome(),empData.getSuperRate()));
         empPay.setFromDate(PayCalculation.setFromDate(empData.getPaymentMonth()));
         empPay.setToDate(PayCalculation.setToDate(empData.getPaymentMonth()));
-
+        //writeOnFile("gtjyky");
+        //System.out.println(parseJSONFile("..\\employeepay\\data.json"));
         return empPay;
+    }
+    public static void writeOnFile(String val){
+        //Get file path
+        File directory = new File("..\\employeepay");
+        //Check if folder available
+        if (! directory.exists()){
+            directory.mkdir();
+        }
+        //write on file
+        try (FileWriter file = new FileWriter("..\\employeepay\\data.json")) {
+
+            file.write(val);
+            file.flush();
+            file.close();
+
+        } catch(Exception e){
+            System.out.println(e);
+
+        }
+
+
+    }
+
+
+    public static JSONArray parseJSONFile(String filename)  {
+        String content = null;
+        try {
+            content = new String(Files.readAllBytes(Paths.get(filename)));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return new JSONArray(content);
     }
 
 
@@ -50,21 +90,21 @@ public  class PayCalculation {
         return roundUp(salary / 12);
     }
     //method calculate the tax bandwidth according salary
-    private double incomeTaxCalculation(double salary) {
+    private static double incomeTaxCalculation(double salary, JSONArray salaryBand) {
         double incomeTax = 0;
-        if (salary < 18200) {
-            return incomeTax;
-        } else if (18200<salary && salary < 37000) {
-            return roundUp(incomeTax = ((incomeTax * 0.19) / 12));
-        } else if (37000< salary && salary < 87000) {
-            return roundUp(incomeTax = (incomeTax + 3572) + (((salary - 37000) * 0.325) / 12));
-        } else if (87000 <salary && salary < 180000) {
-            return roundUp(incomeTax = (incomeTax + 19822) + (((salary - 87000) * 0.37) / 12));
-        } else if (salary > 180000) {
-            return roundUp(incomeTax = (incomeTax + 54232) + (((salary - 180000) * 0.45) / 12));
-        }else{
-            return  incomeTax;
+        for(int i=0;i<salaryBand.length();i++){
+
+            if(salaryBand.getJSONObject(i).getInt("min")<salary &&  salary<salaryBand.getJSONObject(i).getInt("max")){
+               //Taxa
+                incomeTax=salaryBand.getJSONObject(i).getInt("defaultTax")+((salary-(salaryBand.getJSONObject(i).getInt("min")))*salaryBand.getJSONObject(i).getInt("taxRate"));
+            }else{
+                //ERROR
+            }
         }
+
+
+            return  roundUp(incomeTax);
+
     }
     // method return net income Logic(grossIncome  - income Tax)
     private static double netIncomeCalculation(double grossIncome, double incomeTax){
