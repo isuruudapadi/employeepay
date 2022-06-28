@@ -2,25 +2,25 @@
 	"min": 0,
 	"max": 18200,
 	"defaultTax": 0,
-	"taxRate": ".19"
+	"taxRate": 0
 }, {
 	"min": 18201,
 	"max": 37000,
 	"defaultTax": 0,
-	"taxRate": ".19"
+	"taxRate": 0.19
 }, {
 	"min": 37001,
 	"max": 87000,
 	"defaultTax": 3572,
-	"taxRate": ".325"
+	"taxRate": 0.325
 }, {
 	"min": 87001,
 	"max": 180000,
 	"defaultTax": 19822,
-	"taxRate": ".37"
+	"taxRate": 0.37
 }, {
 	"min": 180001,
 	"max": 1000000,
 	"defaultTax": 54235,
-	"taxRate": ".45"
+	"taxRate": 0.45
 }]

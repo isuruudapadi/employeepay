@@ -5,8 +5,6 @@ import com.seisma.employeepay.entity.EmpPay;
 import com.seisma.employeepay.entity.Employee;
 import org.json.JSONArray;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -18,41 +16,20 @@ public  class PayCalculation {
      *
      * @param  @Employee   Employee model send data for calculations
      */
+    private static  String filePath="..\\employeepay\\data.json";
     public static EmpPay PayCalculation(Employee empData) {
 
         EmpPay empPay = new EmpPay();
         empPay.setGrossIncome(PayCalculation.grossIncomeCalculation(empData.getAnnualSalary()));
-        empPay.setIncomeTax(PayCalculation.incomeTaxCalculation(empData.getAnnualSalary(),parseJSONFile("..\\employeepay\\data.json")));
+        empPay.setIncomeTax(PayCalculation.incomeTaxCalculation(empData.getAnnualSalary(),parseJSONFile(filePath)));
         empPay.setNetIncome(PayCalculation.netIncomeCalculation(empPay.getGrossIncome(), empPay.getIncomeTax()));
         empPay.setSuperannuation(PayCalculation.superCalculation(empPay.getGrossIncome(),empData.getSuperRate()));
         empPay.setFromDate(PayCalculation.setFromDate(empData.getPaymentMonth()));
         empPay.setToDate(PayCalculation.setToDate(empData.getPaymentMonth()));
-        //writeOnFile("gtjyky");
-        //System.out.println(parseJSONFile("..\\employeepay\\data.json"));
+
+
         return empPay;
     }
-    public static void writeOnFile(String val){
-        //Get file path
-        File directory = new File("..\\employeepay");
-        //Check if folder available
-        if (! directory.exists()){
-            directory.mkdir();
-        }
-        //write on file
-        try (FileWriter file = new FileWriter("..\\employeepay\\data.json")) {
-
-            file.write(val);
-            file.flush();
-            file.close();
-
-        } catch(Exception e){
-            System.out.println(e);
-
-        }
-
-
-    }
-
 
     public static JSONArray parseJSONFile(String filename)  {
         String content = null;
@@ -92,11 +69,13 @@ public  class PayCalculation {
     //method calculate the tax bandwidth according salary
     private static double incomeTaxCalculation(double salary, JSONArray salaryBand) {
         double incomeTax = 0;
+        double taxRate =0;
         for(int i=0;i<salaryBand.length();i++){
 
             if(salaryBand.getJSONObject(i).getInt("min")<salary &&  salary<salaryBand.getJSONObject(i).getInt("max")){
-               //Taxa
-                incomeTax=salaryBand.getJSONObject(i).getInt("defaultTax")+((salary-(salaryBand.getJSONObject(i).getInt("min")))*salaryBand.getJSONObject(i).getInt("taxRate"));
+                /* Tax income logic base on document Refer Page 1 */
+                taxRate=(salaryBand.getJSONObject(i).getInt("taxRate"));
+                incomeTax=(salaryBand.getJSONObject(i).getInt("defaultTax")+ ((salary-(salaryBand.getJSONObject(i).getInt("min"))) * taxRate))/12;
             }else{
                 //ERROR
             }
