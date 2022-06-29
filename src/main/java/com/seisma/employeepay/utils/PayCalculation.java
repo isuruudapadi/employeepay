@@ -25,13 +25,13 @@ public  class PayCalculation {
 
         EmpPay empPay = new EmpPay();
         empPay.setGrossIncome(PayCalculation.grossIncomeCalculation(empData.getAnnualSalary()));
-       // empPay.setIncomeTax(PayCalculation.incomeTaxCalculation(empData.getAnnualSalary(),parseJSONFile(filePath)));
+       empPay.setIncomeTax(PayCalculation.incomeTaxCalculationV2(empData.getAnnualSalary(),parseJSONFileTOTTaxThreshold(filePath)));
         empPay.setNetIncome(PayCalculation.netIncomeCalculation(empPay.getGrossIncome(), empPay.getIncomeTax()));
         empPay.setSuperannuation(PayCalculation.superCalculation(empPay.getGrossIncome(),empData.getSuperRate()));
         empPay.setFromDate(PayCalculation.setFromDate(empData.getPaymentMonth()));
         empPay.setToDate(PayCalculation.setToDate(empData.getPaymentMonth()));
 
-        PayCalculation.parseJSONFileTOTTaxThreshold(filePath);
+
         return empPay;
     }
 
@@ -54,7 +54,7 @@ public  class PayCalculation {
         try {
             taxThreshold = Arrays.asList(mapper.readValue(Paths.get(filename).toFile(), TaxThreshold[].class));
 
-            taxThreshold.forEach((taxHold) -> System.out.println(taxHold.getMax()));
+            //taxThreshold.forEach((taxHold) -> System.out.println(taxHold.getMax()));
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -91,6 +91,18 @@ public  class PayCalculation {
         return roundUp(salary / 12);
     }
     //method calculate the tax bandwidth according salary
+    private static double incomeTaxCalculationV2(double salary, List<TaxThreshold> taxThreshold){
+        double incomeTax = 0;
+        double taxRate =0;
+        for (TaxThreshold taxBand:taxThreshold) {
+            if(( taxBand.getMin())< salary && salary < taxBand.getMax()){
+                incomeTax =(taxBand.getDefaultTax()+((salary-taxBand.getMin())* taxBand.getTaxRate()))/12;
+            }else {
+                //ERROR
+            }
+        }
+        return  roundUp(incomeTax);
+    }
     private static double incomeTaxCalculation(double salary, JSONArray salaryBand) {
         double incomeTax = 0;
         double taxRate =0;
