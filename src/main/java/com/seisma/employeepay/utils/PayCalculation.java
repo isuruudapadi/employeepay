@@ -5,10 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.seisma.employeepay.entity.EmpPay;
 import com.seisma.employeepay.entity.Employee;
 import com.seisma.employeepay.entity.TaxThreshold;
-import org.json.JSONArray;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Month;
 import java.util.Arrays;
@@ -22,28 +20,23 @@ public  class PayCalculation {
      */
     private static  String filePath="..\\employeepay\\data.json";
     public static EmpPay PayCalculation(Employee empData) throws IOException {
-
+        // create EmpPay instance
         EmpPay empPay = new EmpPay();
+        //Call method set gross income
         empPay.setGrossIncome(PayCalculation.grossIncomeCalculation(empData.getAnnualSalary()));
-       empPay.setIncomeTax(PayCalculation.incomeTaxCalculationV2(empData.getAnnualSalary(),parseJSONFileTOTTaxThreshold(filePath)));
+        //Call method to set income calculate income tax @param1 salary @param2 pass JSON array list  && parse json file path to read json file
+        empPay.setIncomeTax(PayCalculation.incomeTaxCalculationV2(empData.getAnnualSalary(),parseJSONFileTOTTaxThreshold(filePath)));
+        //Call method to set net income
         empPay.setNetIncome(PayCalculation.netIncomeCalculation(empPay.getGrossIncome(), empPay.getIncomeTax()));
+        //call method to set supper
         empPay.setSuperannuation(PayCalculation.superCalculation(empPay.getGrossIncome(),empData.getSuperRate()));
+        //call method to set set date format for return object
         empPay.setFromDate(PayCalculation.setFromDate(empData.getPaymentMonth()));
         empPay.setToDate(PayCalculation.setToDate(empData.getPaymentMonth()));
-
 
         return empPay;
     }
 
-    public static JSONArray parseJSONFile(String filename)  {
-        String content = null;
-        try {
-            content = new String(Files.readAllBytes(Paths.get(filename)));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return new JSONArray(content);
-    }
     public  static  List<TaxThreshold> parseJSONFileTOTTaxThreshold(String filename) {
 
         // create object mapper instance
@@ -53,8 +46,6 @@ public  class PayCalculation {
 
         try {
             taxThreshold = Arrays.asList(mapper.readValue(Paths.get(filename).toFile(), TaxThreshold[].class));
-
-            //taxThreshold.forEach((taxHold) -> System.out.println(taxHold.getMax()));
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -93,7 +84,6 @@ public  class PayCalculation {
     //method calculate the tax bandwidth according salary
     private static double incomeTaxCalculationV2(double salary, List<TaxThreshold> taxThreshold){
         double incomeTax = 0;
-        double taxRate =0;
         for (TaxThreshold taxBand:taxThreshold) {
             if(( taxBand.getMin())< salary && salary < taxBand.getMax()){
                 incomeTax =(taxBand.getDefaultTax()+((salary-taxBand.getMin())* taxBand.getTaxRate()))/12;
@@ -103,24 +93,7 @@ public  class PayCalculation {
         }
         return  roundUp(incomeTax);
     }
-    private static double incomeTaxCalculation(double salary, JSONArray salaryBand) {
-        double incomeTax = 0;
-        double taxRate =0;
-        for(int i=0;i<salaryBand.length();i++){
 
-            if(salaryBand.getJSONObject(i).getInt("min")<salary &&  salary<salaryBand.getJSONObject(i).getInt("max")){
-                /* Tax income logic base on document Refer Page 1 */
-                taxRate=(salaryBand.getJSONObject(i).getInt("taxRate"));
-                incomeTax=(salaryBand.getJSONObject(i).getInt("defaultTax")+ ((salary-(salaryBand.getJSONObject(i).getInt("min"))) * taxRate))/12;
-            }else{
-                //ERROR
-            }
-        }
-
-
-            return  roundUp(incomeTax);
-
-    }
     // method return net income Logic(grossIncome  - income Tax)
     private static double netIncomeCalculation(double grossIncome, double incomeTax){
         return roundUp(grossIncome-incomeTax);
