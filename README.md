@@ -1,6 +1,36 @@
 # employeepay -Spring Boot Backend API
 Spring API Technical Assesment
 
+Assumption :JSOn file save on ="..\\employeepay\\data.json "
+
+json file 
+
+[{
+	"min": 0,
+	"max": 18200,
+	"defaultTax": 0,
+	"taxRate": 0
+}, {
+	"min": 18201,
+	"max": 37000,
+	"defaultTax": 0,
+	"taxRate": 0.19
+}, {
+	"min": 37001,
+	"max": 87000,
+	"defaultTax": 3572,
+	"taxRate": 0.325
+}, {
+	"min": 87001,
+	"max": 180000,
+	"defaultTax": 19822,
+	"taxRate": 0.37
+}, {
+	"min": 180001,
+	"max": 1000000,
+	"defaultTax": 54235,
+	"taxRate": 0.45
+}]
 
 *****************
 localhost:8080/api/payCalculation
