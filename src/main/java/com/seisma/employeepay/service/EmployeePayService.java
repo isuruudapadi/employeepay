@@ -5,6 +5,7 @@ import com.seisma.employeepay.entity.EmpPay;
 import com.seisma.employeepay.entity.Employee;
 import com.seisma.employeepay.utils.PayCalculation;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,7 +19,11 @@ public class EmployeePayService {
         HashMap<String, EmpPay> rtObject = new  HashMap<String, EmpPay>();
         for(Employee emp:employee){
 
-            rtObject.put(emp.toString(), PayCalculation.PayCalculation(emp));
+            try {
+                rtObject.put(emp.toString(), PayCalculation.PayCalculation(emp));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
 
         }
 

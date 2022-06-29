@@ -1,14 +1,18 @@
 package com.seisma.employeepay.utils;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.seisma.employeepay.entity.EmpPay;
 import com.seisma.employeepay.entity.Employee;
+import com.seisma.employeepay.entity.TaxThreshold;
 import org.json.JSONArray;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Month;
+import java.util.Arrays;
+import java.util.List;
 
 public  class PayCalculation {
     /**
@@ -17,17 +21,17 @@ public  class PayCalculation {
      * @param  @Employee   Employee model send data for calculations
      */
     private static  String filePath="..\\employeepay\\data.json";
-    public static EmpPay PayCalculation(Employee empData) {
+    public static EmpPay PayCalculation(Employee empData) throws IOException {
 
         EmpPay empPay = new EmpPay();
         empPay.setGrossIncome(PayCalculation.grossIncomeCalculation(empData.getAnnualSalary()));
-        empPay.setIncomeTax(PayCalculation.incomeTaxCalculation(empData.getAnnualSalary(),parseJSONFile(filePath)));
+       // empPay.setIncomeTax(PayCalculation.incomeTaxCalculation(empData.getAnnualSalary(),parseJSONFile(filePath)));
         empPay.setNetIncome(PayCalculation.netIncomeCalculation(empPay.getGrossIncome(), empPay.getIncomeTax()));
         empPay.setSuperannuation(PayCalculation.superCalculation(empPay.getGrossIncome(),empData.getSuperRate()));
         empPay.setFromDate(PayCalculation.setFromDate(empData.getPaymentMonth()));
         empPay.setToDate(PayCalculation.setToDate(empData.getPaymentMonth()));
 
-
+        PayCalculation.parseJSONFileTOTTaxThreshold(filePath);
         return empPay;
     }
 
@@ -39,6 +43,26 @@ public  class PayCalculation {
             throw new RuntimeException(e);
         }
         return new JSONArray(content);
+    }
+    public  static  List<TaxThreshold> parseJSONFileTOTTaxThreshold(String filename) {
+
+        // create object mapper instance
+        ObjectMapper mapper = new ObjectMapper();
+        // create a array list TaxThreshold
+        List<TaxThreshold> taxThreshold;
+
+        try {
+            taxThreshold = Arrays.asList(mapper.readValue(Paths.get(filename).toFile(), TaxThreshold[].class));
+
+            taxThreshold.forEach((taxHold) -> System.out.println(taxHold.getMax()));
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return taxThreshold;
+
+
     }
 
 
